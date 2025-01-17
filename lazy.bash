@@ -1,4 +1,6 @@
-local hostname=${1}
+#!/bin/env bash
+
+hostname=${1}
 if [ "$hostname" == "" ]; then
   echo "specify hostname"
   exit 1
