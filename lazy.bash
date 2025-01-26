@@ -1,4 +1,5 @@
 #!/bin/env bash
+set -e
 
 # https://github.com/do-i/lazy
 #
@@ -17,7 +18,6 @@ if [ "$username" == "" ]; then
   echo "specify username"
   exit 1
 fi
-
 
 # Set time zone
 ln -sf /usr/share/zoneinfo/America/Detroit /etc/localtime
@@ -78,7 +78,6 @@ grub-install --efi-directory=/boot --bootloader-id=${bootloader_id} /dev/sda
 if [ -d "/boot/EFI/${bootloader_id}" ]; then
   echo "/boot/EFI/${bootloader_id} is created"
 fi
-
 
 # Edit /etc/default/grub
 #
