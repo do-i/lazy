@@ -61,10 +61,11 @@ sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt lvm2 filesystems/g}' /etc/mkinitcpi
 # Re-create initramfs image
 mkinitcpio -P
 
-# Check initramfs image is created
-
+# Check initramfs image is re-created by comparing md5sum
+md5sum /boot/initramfs-linux.img
 if [ -f /boot/initramfs-linux.img ]; then
-  echo '/boot/initramfs-linux.img is created'
+  md5sum /boot/initramfs-linux.img
+  echo 'md5sum should be different'
 fi
 
 # Install GRUB
@@ -123,4 +124,4 @@ echo 'passwd'
 echo "passwd ${username}"
 echo 'exit'
 echo 'umount -R /mnt'
-ehco 'reboot'
+echo 'reboot'
