@@ -55,8 +55,8 @@ usermod -a -G wheel ${username}
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL$/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 # Update /etc/mkinitcpio.conf
-# -> Add encrypt and lvm2 hooks before filesystems hook
-sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt lvm2 filesystems/g}' /etc/mkinitcpio.conf
+# -> Add encrypt hooks before filesystems hook
+sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt filesystems/g}' /etc/mkinitcpio.conf
 
 # Re-create initramfs image
 mkinitcpio -P
