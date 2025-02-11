@@ -19,6 +19,18 @@ if [ "$username" == "" ]; then
   exit 1
 fi
 
+device=${3}
+if [ "$device" == "" ]; then
+  echo "specify device e.g., nvme0n1 or sda"
+  exit 1
+fi
+
+crypt_partition=${4}
+if [ "$crypt_partition" == "" ]; then
+  echo "specify device e.g., nvme0n1p2 or sda2"
+  exit 1
+fi
+
 # Set time zone
 ln -sf /usr/share/zoneinfo/America/Detroit /etc/localtime
 
@@ -61,18 +73,11 @@ sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt filesystems/g}' /etc/mkinitcpio.con
 # Re-create initramfs image
 mkinitcpio -P
 
-# Check initramfs image is re-created by comparing md5sum
-md5sum /boot/initramfs-linux.img
-if [ -f /boot/initramfs-linux.img ]; then
-  md5sum /boot/initramfs-linux.img
-  echo 'md5sum should be different'
-fi
-
 # Install GRUB
 default_bootloader_id="${hostname}Linux"
 bootloader_id="${BOOT_LOADER_ID:-$default_bootloader_id}"
 
-grub-install --efi-directory=/boot --bootloader-id=${bootloader_id} /dev/sda
+grub-install --efi-directory=/boot --bootloader-id=${bootloader_id} /dev/${device}
 
 # Check
 if [ -d "/boot/EFI/${bootloader_id}" ]; then
@@ -84,12 +89,12 @@ fi
 # Automates the following manutal steps
 #
 # First obtain both UUIDs of encrypted and decrypted partition using blkid command.
-#     blkid -o value -s UUID /dev/${encrypted_device} >> /etc/default/grub
-#     blkid -o value -s UUID /dev/mapper/${decrypted_device} >> /etc/default/grub
+#     blkid -o value -s UUID /dev/${encrypted_fs} >> /etc/default/grub
+#     blkid -o value -s UUID /dev/mapper/${decrypted_fs} >> /etc/default/grub
 # Update `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`
-#     GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet cryptdevice=UUID=<uuid-for-encrypted-fs>:${hostname}sec root=UUID=<uuid-for-decrypted-fs>"
+#     GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet cryptdevice=UUID=<encrypted_fs_uuid>:${hostname}sec root=UUID=<decrypted_fs_uuid>"
 default_mapper_name="${hostname}sec"
-encrypted_fs="${ENCRYPTED_FS:-sda2}"
+encrypted_fs="${crypt_partition}"
 decrypted_fs="${DECRYPTED_FS:-$default_mapper_name}"
 echo "encrypted_fs=${encrypted_fs}"
 echo "decrypted_fs=${decrypted_fs}"
