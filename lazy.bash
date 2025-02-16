@@ -3,7 +3,7 @@ set -e
 
 # https://github.com/do-i/lazy
 #
-# Usage: ./lazy.bash <hostname> <username>
+# Usage: ./lazy.bash <hostname> <username> <device> <crypt_partition>
 #
 
 # Check argument
@@ -67,60 +67,26 @@ usermod -a -G wheel ${username}
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL$/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
 # Update /etc/mkinitcpio.conf
-# -> Add encrypt hooks before filesystems hook
+# -> Add encrypt before filesystems hook
 sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt filesystems/g}' /etc/mkinitcpio.conf
 
 # Re-create initramfs image
 mkinitcpio -P
 
-# Install GRUB
-default_bootloader_id="${hostname}Linux"
-bootloader_id="${BOOT_LOADER_ID:-$default_bootloader_id}"
+# Install bootloader
+bootctl --path=/boot install
 
-grub-install --efi-directory=/boot --bootloader-id=${bootloader_id} /dev/${device}
+# Create loader.conf
+echo default arch >> /boot/loader/loader.conf
+echo timeout 5 >> /boot/loader/loader.conf
 
-# Check
-if [ -d "/boot/EFI/${bootloader_id}" ]; then
-  echo "/boot/EFI/${bootloader_id} is created"
-fi
-
-# Edit /etc/default/grub
-#
-# Automates the following manutal steps
-#
-# First obtain both UUIDs of encrypted and decrypted partition using blkid command.
-#     blkid -o value -s UUID /dev/${encrypted_fs} >> /etc/default/grub
-#     blkid -o value -s UUID /dev/mapper/${decrypted_fs} >> /etc/default/grub
-# Update `GRUB_CMDLINE_LINUX_DEFAULT` in `/etc/default/grub`
-#     GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet cryptdevice=UUID=<encrypted_fs_uuid>:${hostname}sec root=UUID=<decrypted_fs_uuid>"
-default_mapper_name="${hostname}sec"
-encrypted_fs="${crypt_partition}"
-decrypted_fs="${DECRYPTED_FS:-$default_mapper_name}"
-echo "encrypted_fs=${encrypted_fs}"
-echo "decrypted_fs=${decrypted_fs}"
-
-encrypted_fs_uuid=$(blkid -o value -s UUID /dev/${encrypted_fs})
-decrypted_fs_uuid=$(blkid -o value -s UUID /dev/mapper/${decrypted_fs})
-
-if [[ "${encrypted_fs_uuid}" == "" ]]; then
-  echo "/dev/${encrypted_fs} not found."
-  exit 2
-fi
-if [[ "${decrypted_fs_uuid}" == "" ]]; then
-  echo "/dev/mapper/${decrypted_fs} not found."
-  exit 2
-fi
-
-echo "/dev/${encrypted_fs} -> ${encrypted_fs_uuid}"
-echo "/dev/mapper/${decrypted_fs} -> ${decrypted_fs_uuid}"
-
-sed -i "s/^GRUB_CMDLINE_LINUX_DEFAULT=.*\"$/\
-GRUB_CMDLINE_LINUX_DEFAULT=\"loglevel=3 quiet \
-cryptdevice=UUID=${encrypted_fs_uuid}:${decrypted_fs} \
-root=UUID=${decrypted_fs_uuid}\"/" /etc/default/grub
-
-# Generate main GRUB config
-grub-mkconfig -o /boot/grub/grub.cfg
+# Create a loader file
+cat > /boot/loader/entries/arch.conf << EOL
+title Arch Linux ${hostname}
+linux /vmlinuz-linux
+initrd /initramfs-linux.img
+options cryptdevice=/dev/${crypt_partition}:crypt-root root=/dev/mapper/crypt-root quiet rw
+EOL
 
 # Exist / Umount / Reboot
 echo 'Run following commands:'
