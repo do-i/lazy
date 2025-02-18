@@ -13,8 +13,7 @@ echo "destination dir: ${dest_dir}"
 
 mkdir -p ${dest_dir}
 cd ${dest_dir}
-curl -O https://raw.githubusercontent.com/do-i/lazy/refs/heads/main/part.bash
-curl -O https://raw.githubusercontent.com/do-i/lazy/refs/heads/main/scratch.bash
-curl -O https://raw.githubusercontent.com/do-i/lazy/refs/heads/main/boot.bash
+curl -O https://raw.githubusercontent.com/do-i/lazy/refs/heads/main/create.bash
+curl -O https://raw.githubusercontent.com/do-i/lazy/refs/heads/main/configure.bash
 
 chmod +x *.bash

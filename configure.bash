@@ -5,7 +5,7 @@ set -e
 #
 # Run this script within chroot
 #
-# Usage: ./boot.bash <hostname> <username> <device> <crypt_partition>
+# Usage: $0 <hostname> <username> <device> <crypt_partition>
 #
 
 # Check argument
@@ -38,9 +38,6 @@ ln -sf /usr/share/zoneinfo/America/Detroit /etc/localtime
 
 # Set hardware clock
 hwclock --systohc
-
-# Check time and timezone
-date
 
 # Uncomment en_US.UTF-8 in the /etc/locale.gen file
 sed -i '/^#en_US\.UTF-8/s/^#//' /etc/locale.gen
@@ -89,11 +86,3 @@ linux /vmlinuz-linux
 initrd /initramfs-linux.img
 options cryptdevice=/dev/${crypt_partition}:crypt-root root=/dev/mapper/crypt-root quiet rw
 EOL
-
-# Exist / Umount / Reboot
-echo 'Run following commands:'
-echo 'passwd'
-echo "passwd ${username}"
-echo 'exit'
-echo 'umount -R /mnt'
-echo 'shutdown now'
