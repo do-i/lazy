@@ -84,5 +84,5 @@ cat > /boot/loader/entries/arch.conf << EOL
 title Arch Linux ${hostname}
 linux /vmlinuz-linux
 initrd /initramfs-linux.img
-options cryptdevice=/dev/${crypt_partition}:crypt-root root=/dev/mapper/crypt-root quiet rw
+options cryptdevice=${crypt_partition}:crypt-root root=/dev/mapper/crypt-root quiet rw
 EOL
