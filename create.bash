@@ -14,7 +14,7 @@ set -e
 
 device_name=${1}
 if [ "$device_name" == "" ]; then
-  echo "specify device e.g., nvme0n1 or sda"
+  echo "specify device e.g., nvme0n1 or sda or vda"
   exit 1
 fi
 
@@ -30,7 +30,7 @@ if [ "$username" == "" ]; then
   exit 1
 fi
 
-if [[ $device_name =~ ^sd[a-h]$ ]]; then
+if [[ $device_name =~ ^[sv]d[a-h]$ ]]; then
   echo "SSD"
   boot_partition="/dev/${device_name}1"
   root_partition="/dev/${device_name}2"
