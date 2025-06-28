@@ -78,11 +78,12 @@ bootctl --path=/boot install
 # Create loader.conf
 echo default arch >> /boot/loader/loader.conf
 echo timeout 5 >> /boot/loader/loader.conf
+crypt_partition_uuid=$(blkid -o value -s UUID ${crypt_partition})
 
 # Create a loader file
 cat > /boot/loader/entries/arch.conf << EOL
 title Arch Linux ${hostname}
 linux /vmlinuz-linux
 initrd /initramfs-linux.img
-options cryptdevice=${crypt_partition}:crypt-root root=/dev/mapper/crypt-root quiet rw
+options cryptdevice=UUID=${crypt_partition_uuid}:crypt-root root=/dev/mapper/crypt-root quiet rw
 EOL
