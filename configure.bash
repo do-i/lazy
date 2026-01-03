@@ -73,7 +73,7 @@ sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt filesystems/g}' /etc/mkinitcpio.con
 mkinitcpio -P
 
 # Install bootloader
-bootctl --path=/boot install
+bootctl --esp-path=/boot install
 
 # Create loader.conf
 echo default arch >> /boot/loader/loader.conf
