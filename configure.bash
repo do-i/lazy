@@ -69,6 +69,15 @@ sed -i 's/^# %wheel ALL=(ALL:ALL) ALL$/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 # -> Add encrypt before filesystems hook
 sed -i '/^HOOKS=(.*)$/{s/filesystems/encrypt filesystems/g}' /etc/mkinitcpio.conf
 
+# Replace systemd with udev
+sed -i '/^HOOKS=(.*)$/{s/systemd/udev/g}' /etc/mkinitcpio.conf
+
+# Replace sd-vconsole with consolefont
+sed -i '/^HOOKS=(.*)$/{s/sd-vconsole/consolefont/g}' /etc/mkinitcpio.conf
+
+# Resulting hooks are
+# base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck
+
 # Re-create initramfs image
 mkinitcpio -P
 
